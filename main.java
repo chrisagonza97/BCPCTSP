@@ -2,11 +2,11 @@ import java.io.*;
 import java.util.*;
 
 //imports for google OR-tools
-import com.google.ortools.Loader;
+/*import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPConstraint;
 import com.google.ortools.linearsolver.MPObjective;
 import com.google.ortools.linearsolver.MPSolver;
-import com.google.ortools.linearsolver.MPVariable;
+import com.google.ortools.linearsolver.MPVariable;*/
 
 public class main {
     // meta variable
@@ -23,11 +23,11 @@ public class main {
     static final int TRIALS = 300000;
     static final int NUM_AGENTS = 5;
     static final double W = 100.0; // constant value to update the reward table
-    static final double alpha = 0.125; // .125 learning rate
-    static final double gamma = 0.35; // .35 discount factor
+    static double alpha = 0.125; // .125 learning rate
+    static double gamma = 0.35; // .35 discount factor
     static final double delta = 1; // power for Q value
     static final double beta = 2; // power for distance
-    static final double q0 = 0.8; // coefficient for exploration and exploitation
+    static double q0 = 0.8; // coefficient for exploration and exploitation
 
     // flags for graph (do not touch)
     static final int UNVISITED = 0;
@@ -168,7 +168,7 @@ public class main {
         }
     }
 
-    static void traverseIlp() {
+   /*  static void traverseIlp() {
         // initList(true);
         // initGraph();
         // reset();
@@ -247,9 +247,9 @@ public class main {
 
         remainingBudget = budget - total_wt;
     }
-
-    private static void makeConstraintSix(MPConstraint[] six, MPSolver solver, MPVariable[][] x, MPVariable[] u) {
-        /*
+*/
+    /*private static void makeConstraintSix(MPConstraint[] six, MPSolver solver, MPVariable[][] x, MPVariable[] u) {
+        
          * rule_no_subtour_1:
          * forall(i in 2..n) u[i]<=n;
          * rule_no_subtour_2:
@@ -258,7 +258,7 @@ public class main {
          * rule_no_subtour_3:
          * forall(i,j in 2..n) u[i]-u[j]+1 <= (n-1) * (1-x[i][j]);
          * u[i]-u[j]+1 <= -47
-         */
+         
         int infinity = java.lang.Integer.MAX_VALUE;
         int constraint = 0;
         MPVariable one = solver.makeIntVar(1, 1, "1");
@@ -267,13 +267,13 @@ public class main {
             six[constraint].setCoefficient(u[i], 1);
             constraint++;
         }
-        /*
+        
          * for(int i=1;i<n;i++){
          * six[constraint]= solver.makeConstraint(2,infinity,"");
          * six[constraint].setCoefficient(u[i], 1);
          * constraint++;
          * }
-         */
+         
         for (int i = 1; i < n; i++) {
             for (int j = 1; j < n; j++) {
                 if (i == j) {
@@ -298,12 +298,12 @@ public class main {
         six[constraint] = solver.makeConstraint(0, 0, "");
         six[constraint].setCoefficient(u[0], 1);
     }
-
-    private static void makeConstraintFive(MPConstraint[] five, MPSolver solver, MPVariable[][] x) {
-        /*
+*/
+    /*private static void makeConstraintFive(MPConstraint[] five, MPSolver solver, MPVariable[][] x) {
+        
          * constraint_3:
          * sum (i in 1..n) sum(j in 1..n) x[i][j] * Cost[i][j]<=500;
-         */
+         
         int infinity = java.lang.Integer.MAX_VALUE;
         five[0] = solver.makeConstraint(-infinity, budget, "");
         for (int i = 0; i < n; i++) {
@@ -312,16 +312,16 @@ public class main {
             }
 
         }
-    }
+    }*/
 
-    private static void makeConstraintFour(MPConstraint[] four, MPSolver solver, MPVariable[][] x) {
-        /*
+    /*private static void makeConstraintFour(MPConstraint[] four, MPSolver solver, MPVariable[][] x) {
+        
          * constraint_2:
          * forall (k in 1..n){
          * sum(i in 1..n) x[i][k] == sum(j in 1..n) x[k][j] ;
          * sum(i in 1..n) x[i][k] <= 1;
          * }
-         */
+         
         int infinity = java.lang.Integer.MAX_VALUE;
         int constraint = 0;
         for (int i = 0; i < n; i++) {
@@ -339,7 +339,7 @@ public class main {
             }
             constraint++;
         }
-    }
+    }*/
 
     /*
      * Documentation for initList(boolean flag)
@@ -449,13 +449,13 @@ public class main {
         sGraph.constructShortestPath();
     }
 
-    private static void makeConstraintThree(MPConstraint[] three, MPSolver solver, MPVariable[][] x) {
-        /*
+    /*private static void makeConstraintThree(MPConstraint[] three, MPSolver solver, MPVariable[][] x) {
+        
          * contraint_1a:
          * sum(2..n) x[1][j] ==1;
          * constraint_1b:
          * sum(2..n) x[i][1] ==1;
-         */
+         
         int constraint = 0;
         three[constraint] = solver.makeConstraint(1, 1, "");
         for (int i = 1; i < n; i++) {
@@ -467,7 +467,7 @@ public class main {
             three[constraint].setCoefficient(x[i][0], 1);
         }
         constraint++;
-    }
+    }*/
 
     static void askForUserInputs() {
         Scanner scanner = new Scanner(System.in);
@@ -632,6 +632,8 @@ public class main {
      */
     static void learnQ() {
         for (int i = 0; i < TRIALS; i++) {
+            //for every episode, change learning rate and discount factor and epsilon?
+            setHypers(i);
             Agent[] aList = new Agent[NUM_AGENTS];
             for (int j = 0; j < NUM_AGENTS; j++) {
                 Graph newGraph = new Graph(sGraph);
@@ -676,6 +678,12 @@ public class main {
                         + alpha * (R[path.get(v)][path.get(v + 1)] + gamma * maxQ);
             }
         }
+    }
+
+    private static void setHypers(int i) {
+        alpha = 1-(i/TRIALS);
+        //gamma = i/TRIALS;
+        q0 = 1-(i/TRIALS);
     }
 
     /*
