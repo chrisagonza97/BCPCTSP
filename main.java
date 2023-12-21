@@ -22,12 +22,12 @@ public class main {
     // static variables to be tweaked by user
     static final int TRIALS = 300000;
     static final int NUM_AGENTS = 5;
-    static final double W = 100.0; // constant value to update the reward table
+    static final double W = 1000.0; // constant value to update the reward table
     static double alpha = 0.125; // .125 learning rate
     static double gamma = 0.35; // .35 discount factor
     static final double delta = 1; // power for Q value
     static final double beta = 2; // power for distance
-    static double q0 = 0.8; // coefficient for exploration and exploitation
+    static double q0 = 0.2 ; // coefficient for exploration and exploitation
 
     // flags for graph (do not touch)
     static final int UNVISITED = 0;
@@ -99,7 +99,7 @@ public class main {
         System.out.printf("\nTotal distance: %6.2f Miles", total_wt);
         // System.out.printf("\nRemaining distance: %6.2fkm", budget - total_wt);
         System.out.printf("\nCollected Prize: $%d", total_prize - arrCities.get(0).pop * 2);
-        System.out.printf("\nRoute: %s\n", route.toString());
+        System.out.printf("\nRoute: %s\n", makeRouteString());
         System.out.printf("Remaining Budget: %.2f Miles\n", remainingBudget);
         /*
          * System.out.println("\n========== Optimal ILP Algorithm ==========");
@@ -116,6 +116,24 @@ public class main {
          * //System.out.printf("\nRoute: %s\n", route.toString());
          * //System.out.printf("Remaining Budget: %.2f miles\n", remainingBudget);
          */
+    }
+
+    private static String makeRouteString() {
+        String ret = "";
+        for (int i = 0; i <route.size();i++){
+            ret+=arrCities.get(route.get(i)).name;
+            if(i!=route.size()-1){
+                ret+="("+route.get(i)+")";
+            }else{
+                ret+="("+0+")";
+            }
+            
+            if(i!=route.size()-1){
+                ret+=", ";
+            }
+            
+        }
+        return ret;
     }
 
     private static void printIlpArrays() {
@@ -166,180 +184,213 @@ public class main {
             }
 
         }
+        // print route
+        /*String finRoute = " 1 -> 6 \r\n" + //
+                " 2 -> 5 \r\n" + //
+                " 3 -> 2 \r\n" + //
+                " 4 -> 3 \r\n" + //
+                " 5 -> 8 \r\n" + //
+                " 6 -> 7 \r\n" + //
+                " 7 -> 4 \r\n" + //
+                " 8 -> 9 \r\n" + //
+                " 9 -> 1";
+        String finRoutefin = finRoute.replace(" 1 ", arrCities.get(0).name);
+        finRoutefin = finRoutefin.replace(" 2 ", arrCities.get(1).name);
+        finRoutefin = finRoutefin.replace(" 3 ", arrCities.get(2).name);
+        finRoutefin = finRoutefin.replace(" 4 ", arrCities.get(3).name);
+        finRoutefin = finRoutefin.replace(" 5 ", arrCities.get(4).name);
+        finRoutefin = finRoutefin.replace(" 6 ", arrCities.get(5).name);
+        finRoutefin = finRoutefin.replace(" 7 ", arrCities.get(6).name);
+        finRoutefin = finRoutefin.replace(" 8 ", arrCities.get(7).name);
+        finRoutefin = finRoutefin.replace(" 9 ", arrCities.get(8).name);
+        finRoutefin = finRoutefin.replace(" 10 ", arrCities.get(9).name);
+        System.out.println(finRoutefin);*/
     }
 
-   /*  static void traverseIlp() {
-        // initList(true);
-        // initGraph();
-        // reset();
-        LinkedList<CityNode> tempCit = arrCities;
-        arrCities.get(0).pop = 0;
-        int infinity = java.lang.Integer.MAX_VALUE;
-        int n = 48;
-        Loader.loadNativeLibraries();
-        MPSolver solver = MPSolver.createSolver("GLOP");
-        MPVariable[][] x = new MPVariable[n][n];
-        MPVariable[] u = new MPVariable[n];
+    /*
+     * static void traverseIlp() {
+     * // initList(true);
+     * // initGraph();
+     * // reset();
+     * LinkedList<CityNode> tempCit = arrCities;
+     * arrCities.get(0).pop = 0;
+     * int infinity = java.lang.Integer.MAX_VALUE;
+     * int n = 48;
+     * Loader.loadNativeLibraries();
+     * MPSolver solver = MPSolver.createSolver("GLOP");
+     * MPVariable[][] x = new MPVariable[n][n];
+     * MPVariable[] u = new MPVariable[n];
+     * 
+     * // create 2d array of decision variable x
+     * // xij value is either 0 or 1
+     * for (int i = 0; i < x.length; i++) {
+     * for (int j = 0; j < x[i].length; j++) {
+     * if (i != j) {
+     * x[i][j] = solver.makeIntVar(0, 1, "x_" + i + "_" + j);
+     * } else {
+     * x[i][j] = solver.makeIntVar(0, 0, "x_" + i + "_" + j);
+     * }
+     * 
+     * }
+     * }
+     * for (int i = 0; i < n; i++) {
+     * u[i] = solver.makeIntVar(0, infinity, "");
+     * }
+     * // constraint (3)
+     * // guarantees that the prize-collecting path starts at nodes and ends at node
+     * t.
+     * MPConstraint[] three = new MPConstraint[2];
+     * makeConstraintThree(three, solver, x);
+     * 
+     * // constraint (4)
+     * // ensures the connectivity of the path and that each node is visited at most
+     * // once.
+     * MPConstraint[] four = new MPConstraint[n * 2];
+     * makeConstraintFour(four, solver, x);
+     * 
+     * // constraint (5)
+     * // guarantees that the total traveling cost on the path does not exceed the
+     * // given budget of B.
+     * MPConstraint[] five = new MPConstraint[1];
+     * makeConstraintFive(five, solver, x);
+     * 
+     * // constraint (6)
+     * // are called Miller–Tucker–Zemlin (MTZ) Subtour Elimination Constraints.
+     * They
+     * // guarantee that there is one global tour visiting all vertices instead of
+     * // multiple subtours each visiting only a subset of the vertices.
+     * MPConstraint[] six = new MPConstraint[n * 2 + n * n * 2];
+     * makeConstraintSix(six, solver, x, u);
+     * 
+     * // set Objective,:
+     * // maximize sum(i in 2..n) sum(j in 1..n) p[i] * x[i][j];
+     * MPObjective objective = solver.objective();
+     * for (int i = 1; i < n; i++) {
+     * for (int j = 0; j < n; j++) {
+     * objective.setCoefficient(x[i][j], arrCities.get(i).pop);
+     * }
+     * }
+     * objective.setMaximization();
+     * 
+     * // solve
+     * final MPSolver.ResultStatus resultStatus = solver.solve();
+     * // prize output
+     * System.out.println("Objective(prize collected): " + objective.value());
+     * // distance output
+     * double distance = 0.0;
+     * for (int i = 0; i < x.length; i++) {
+     * for (int j = 0; j < x[i].length; j++) {
+     * if (x[i][j].solutionValue() > 0) {
+     * distance += CityNode.getDistance(arrCities.get(i), arrCities.get(j));
+     * }
+     * }
+     * }
+     * System.out.println("total distance: " + distance);
+     * 
+     * remainingBudget = budget - total_wt;
+     * }
+     */
+    /*
+     * private static void makeConstraintSix(MPConstraint[] six, MPSolver solver,
+     * MPVariable[][] x, MPVariable[] u) {
+     * 
+     * rule_no_subtour_1:
+     * forall(i in 2..n) u[i]<=n;
+     * rule_no_subtour_2:
+     * forall(i in 2..n) u[i]>=2;
+     * 
+     * rule_no_subtour_3:
+     * forall(i,j in 2..n) u[i]-u[j]+1 <= (n-1) * (1-x[i][j]);
+     * u[i]-u[j]+1 <= -47
+     * 
+     * int infinity = java.lang.Integer.MAX_VALUE;
+     * int constraint = 0;
+     * MPVariable one = solver.makeIntVar(1, 1, "1");
+     * for (int i = 1; i < n; i++) {
+     * six[constraint] = solver.makeConstraint(2, n, "");
+     * six[constraint].setCoefficient(u[i], 1);
+     * constraint++;
+     * }
+     * 
+     * for(int i=1;i<n;i++){
+     * six[constraint]= solver.makeConstraint(2,infinity,"");
+     * six[constraint].setCoefficient(u[i], 1);
+     * constraint++;
+     * }
+     * 
+     * for (int i = 1; i < n; i++) {
+     * for (int j = 1; j < n; j++) {
+     * if (i == j) {
+     * continue;
+     * }
+     * 
+     * six[constraint] = solver.makeConstraint(-infinity, 0, "");
+     * // left side
+     * six[constraint].setCoefficient(u[i], 1);
+     * six[constraint].setCoefficient(u[j], -1);
+     * six[constraint].setCoefficient(one, 1);
+     * constraint++;
+     * // right side
+     * six[constraint] = solver.makeConstraint(1, infinity, "");
+     * six[constraint].setCoefficient(x[i][j], (n - 1));
+     * six[constraint].setCoefficient(one, (n - 1));
+     * // six[constraint].setCoefficient(x[i][j],-(n-1));
+     * six[constraint].setCoefficient(x[i][j], -(n - 1) * 2);
+     * constraint++;
+     * }
+     * }
+     * six[constraint] = solver.makeConstraint(0, 0, "");
+     * six[constraint].setCoefficient(u[0], 1);
+     * }
+     */
+    /*
+     * private static void makeConstraintFive(MPConstraint[] five, MPSolver solver,
+     * MPVariable[][] x) {
+     * 
+     * constraint_3:
+     * sum (i in 1..n) sum(j in 1..n) x[i][j] * Cost[i][j]<=500;
+     * 
+     * int infinity = java.lang.Integer.MAX_VALUE;
+     * five[0] = solver.makeConstraint(-infinity, budget, "");
+     * for (int i = 0; i < n; i++) {
+     * for (int j = 0; j < n; j++) {
+     * five[0].setCoefficient(x[i][j], CityNode.getDistance(arrCities.get(i),
+     * arrCities.get(j)));
+     * }
+     * 
+     * }
+     * }
+     */
 
-        // create 2d array of decision variable x
-        // xij value is either 0 or 1
-        for (int i = 0; i < x.length; i++) {
-            for (int j = 0; j < x[i].length; j++) {
-                if (i != j) {
-                    x[i][j] = solver.makeIntVar(0, 1, "x_" + i + "_" + j);
-                } else {
-                    x[i][j] = solver.makeIntVar(0, 0, "x_" + i + "_" + j);
-                }
-
-            }
-        }
-        for (int i = 0; i < n; i++) {
-            u[i] = solver.makeIntVar(0, infinity, "");
-        }
-        // constraint (3)
-        // guarantees that the prize-collecting path starts at nodes and ends at node t.
-        MPConstraint[] three = new MPConstraint[2];
-        makeConstraintThree(three, solver, x);
-
-        // constraint (4)
-        // ensures the connectivity of the path and that each node is visited at most
-        // once.
-        MPConstraint[] four = new MPConstraint[n * 2];
-        makeConstraintFour(four, solver, x);
-
-        // constraint (5)
-        // guarantees that the total traveling cost on the path does not exceed the
-        // given budget of B.
-        MPConstraint[] five = new MPConstraint[1];
-        makeConstraintFive(five, solver, x);
-
-        // constraint (6)
-        // are called Miller–Tucker–Zemlin (MTZ) Subtour Elimination Constraints. They
-        // guarantee that there is one global tour visiting all vertices instead of
-        // multiple subtours each visiting only a subset of the vertices.
-        MPConstraint[] six = new MPConstraint[n * 2 + n * n * 2];
-        makeConstraintSix(six, solver, x, u);
-
-        // set Objective,:
-        // maximize sum(i in 2..n) sum(j in 1..n) p[i] * x[i][j];
-        MPObjective objective = solver.objective();
-        for (int i = 1; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                objective.setCoefficient(x[i][j], arrCities.get(i).pop);
-            }
-        }
-        objective.setMaximization();
-
-        // solve
-        final MPSolver.ResultStatus resultStatus = solver.solve();
-        // prize output
-        System.out.println("Objective(prize collected): " + objective.value());
-        // distance output
-        double distance = 0.0;
-        for (int i = 0; i < x.length; i++) {
-            for (int j = 0; j < x[i].length; j++) {
-                if (x[i][j].solutionValue() > 0) {
-                    distance += CityNode.getDistance(arrCities.get(i), arrCities.get(j));
-                }
-            }
-        }
-        System.out.println("total distance: " + distance);
-
-        remainingBudget = budget - total_wt;
-    }
-*/
-    /*private static void makeConstraintSix(MPConstraint[] six, MPSolver solver, MPVariable[][] x, MPVariable[] u) {
-        
-         * rule_no_subtour_1:
-         * forall(i in 2..n) u[i]<=n;
-         * rule_no_subtour_2:
-         * forall(i in 2..n) u[i]>=2;
-         * 
-         * rule_no_subtour_3:
-         * forall(i,j in 2..n) u[i]-u[j]+1 <= (n-1) * (1-x[i][j]);
-         * u[i]-u[j]+1 <= -47
-         
-        int infinity = java.lang.Integer.MAX_VALUE;
-        int constraint = 0;
-        MPVariable one = solver.makeIntVar(1, 1, "1");
-        for (int i = 1; i < n; i++) {
-            six[constraint] = solver.makeConstraint(2, n, "");
-            six[constraint].setCoefficient(u[i], 1);
-            constraint++;
-        }
-        
-         * for(int i=1;i<n;i++){
-         * six[constraint]= solver.makeConstraint(2,infinity,"");
-         * six[constraint].setCoefficient(u[i], 1);
-         * constraint++;
-         * }
-         
-        for (int i = 1; i < n; i++) {
-            for (int j = 1; j < n; j++) {
-                if (i == j) {
-                    continue;
-                }
-
-                six[constraint] = solver.makeConstraint(-infinity, 0, "");
-                // left side
-                six[constraint].setCoefficient(u[i], 1);
-                six[constraint].setCoefficient(u[j], -1);
-                six[constraint].setCoefficient(one, 1);
-                constraint++;
-                // right side
-                six[constraint] = solver.makeConstraint(1, infinity, "");
-                six[constraint].setCoefficient(x[i][j], (n - 1));
-                six[constraint].setCoefficient(one, (n - 1));
-                // six[constraint].setCoefficient(x[i][j],-(n-1));
-                six[constraint].setCoefficient(x[i][j], -(n - 1) * 2);
-                constraint++;
-            }
-        }
-        six[constraint] = solver.makeConstraint(0, 0, "");
-        six[constraint].setCoefficient(u[0], 1);
-    }
-*/
-    /*private static void makeConstraintFive(MPConstraint[] five, MPSolver solver, MPVariable[][] x) {
-        
-         * constraint_3:
-         * sum (i in 1..n) sum(j in 1..n) x[i][j] * Cost[i][j]<=500;
-         
-        int infinity = java.lang.Integer.MAX_VALUE;
-        five[0] = solver.makeConstraint(-infinity, budget, "");
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                five[0].setCoefficient(x[i][j], CityNode.getDistance(arrCities.get(i), arrCities.get(j)));
-            }
-
-        }
-    }*/
-
-    /*private static void makeConstraintFour(MPConstraint[] four, MPSolver solver, MPVariable[][] x) {
-        
-         * constraint_2:
-         * forall (k in 1..n){
-         * sum(i in 1..n) x[i][k] == sum(j in 1..n) x[k][j] ;
-         * sum(i in 1..n) x[i][k] <= 1;
-         * }
-         
-        int infinity = java.lang.Integer.MAX_VALUE;
-        int constraint = 0;
-        for (int i = 0; i < n; i++) {
-            four[constraint] = solver.makeConstraint(0, 0, "");
-            for (int j = 0; j < n; j++) {
-                four[constraint].setCoefficient(x[j][i], 1);
-            }
-            for (int j = 0; j < n; j++) {
-                four[constraint].setCoefficient(x[i][j], -1);
-            }
-            constraint++;
-            four[constraint] = solver.makeConstraint(0, 1, "");
-            for (int j = 0; j < n; j++) {
-                four[constraint].setCoefficient(x[j][i], 1);
-            }
-            constraint++;
-        }
-    }*/
+    /*
+     * private static void makeConstraintFour(MPConstraint[] four, MPSolver solver,
+     * MPVariable[][] x) {
+     * 
+     * constraint_2:
+     * forall (k in 1..n){
+     * sum(i in 1..n) x[i][k] == sum(j in 1..n) x[k][j] ;
+     * sum(i in 1..n) x[i][k] <= 1;
+     * }
+     * 
+     * int infinity = java.lang.Integer.MAX_VALUE;
+     * int constraint = 0;
+     * for (int i = 0; i < n; i++) {
+     * four[constraint] = solver.makeConstraint(0, 0, "");
+     * for (int j = 0; j < n; j++) {
+     * four[constraint].setCoefficient(x[j][i], 1);
+     * }
+     * for (int j = 0; j < n; j++) {
+     * four[constraint].setCoefficient(x[i][j], -1);
+     * }
+     * constraint++;
+     * four[constraint] = solver.makeConstraint(0, 1, "");
+     * for (int j = 0; j < n; j++) {
+     * four[constraint].setCoefficient(x[j][i], 1);
+     * }
+     * constraint++;
+     * }
+     * }
+     */
 
     /*
      * Documentation for initList(boolean flag)
@@ -449,25 +500,28 @@ public class main {
         sGraph.constructShortestPath();
     }
 
-    /*private static void makeConstraintThree(MPConstraint[] three, MPSolver solver, MPVariable[][] x) {
-        
-         * contraint_1a:
-         * sum(2..n) x[1][j] ==1;
-         * constraint_1b:
-         * sum(2..n) x[i][1] ==1;
-         
-        int constraint = 0;
-        three[constraint] = solver.makeConstraint(1, 1, "");
-        for (int i = 1; i < n; i++) {
-            three[constraint].setCoefficient(x[0][i], 1);
-        }
-        constraint++;
-        three[constraint] = solver.makeConstraint(1, 1, "");
-        for (int i = 1; i < n; i++) {
-            three[constraint].setCoefficient(x[i][0], 1);
-        }
-        constraint++;
-    }*/
+    /*
+     * private static void makeConstraintThree(MPConstraint[] three, MPSolver
+     * solver, MPVariable[][] x) {
+     * 
+     * contraint_1a:
+     * sum(2..n) x[1][j] ==1;
+     * constraint_1b:
+     * sum(2..n) x[i][1] ==1;
+     * 
+     * int constraint = 0;
+     * three[constraint] = solver.makeConstraint(1, 1, "");
+     * for (int i = 1; i < n; i++) {
+     * three[constraint].setCoefficient(x[0][i], 1);
+     * }
+     * constraint++;
+     * three[constraint] = solver.makeConstraint(1, 1, "");
+     * for (int i = 1; i < n; i++) {
+     * three[constraint].setCoefficient(x[i][0], 1);
+     * }
+     * constraint++;
+     * }
+     */
 
     static void askForUserInputs() {
         Scanner scanner = new Scanner(System.in);
@@ -632,8 +686,8 @@ public class main {
      */
     static void learnQ() {
         for (int i = 0; i < TRIALS; i++) {
-            //for every episode, change learning rate and discount factor and epsilon?
-            setHypers(i);
+            // for every episode, change learning rate and discount factor and epsilon?
+            // setHypers(i);
             Agent[] aList = new Agent[NUM_AGENTS];
             for (int j = 0; j < NUM_AGENTS; j++) {
                 Graph newGraph = new Graph(sGraph);
@@ -681,9 +735,9 @@ public class main {
     }
 
     private static void setHypers(int i) {
-        alpha = 1-(i/TRIALS);
-        //gamma = i/TRIALS;
-        q0 = 1-(i/TRIALS);
+        alpha = 1 - (i / TRIALS);
+        // gamma = i/TRIALS;
+        q0 = 1 - (i / TRIALS);
     }
 
     /*
