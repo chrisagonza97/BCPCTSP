@@ -123,9 +123,9 @@ public class main {
         for (int i = 0; i <route.size();i++){
             ret+=arrCities.get(route.get(i)).name;
             if(i!=route.size()-1){
-                ret+="("+route.get(i)+")";
+                ret+="("+arrCities.get(route.get(i)).originalIndex+")";
             }else{
-                ret+="("+0+")";
+                ret+="("+arrCities.get(route.get(i)).originalIndex+")";
             }
             
             if(i!=route.size()-1){
@@ -551,6 +551,7 @@ public class main {
         try {
             Scanner scan = new Scanner(towns);
             // (2)
+            int originIndex=0;
             while (scan.hasNextLine()) {
                 String name = scan.next();
                 double lat = scan.nextDouble();
@@ -559,6 +560,9 @@ public class main {
 
                 arrCities.add(new CityNode(name, lat, lon, pop));
                 nameList.add(name.toLowerCase());
+
+                arrCities.get(arrCities.size()-1).originalIndex=originIndex;
+                originIndex++;
             }
             scan.close();
         }
@@ -578,6 +582,7 @@ public class main {
             if (startCity.equalsIgnoreCase(endCity)) {
                 int sIndex = nameList.indexOf(startCity);
                 CityNode t1 = new CityNode(arrCities.get(sIndex));
+                t1.originalIndex = arrCities.get(sIndex).originalIndex;
                 arrCities.remove(sIndex);
                 nameList.remove(sIndex);
 
@@ -586,11 +591,13 @@ public class main {
             } else {
                 int sIndex = nameList.indexOf(startCity);
                 CityNode t1 = new CityNode(arrCities.get(sIndex));
+                t1.originalIndex = arrCities.get(sIndex).originalIndex;
                 arrCities.remove(sIndex);
                 nameList.remove(sIndex);
 
                 int fIndex = nameList.indexOf(endCity);
                 CityNode t2 = new CityNode(arrCities.get(fIndex));
+                t2.originalIndex = arrCities.get(fIndex).originalIndex;
                 arrCities.remove(fIndex);
 
                 arrCities.add(0, t1);

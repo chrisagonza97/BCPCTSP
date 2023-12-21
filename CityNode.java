@@ -3,6 +3,7 @@ public class CityNode
 	public String name;
 	public double lat, lon;
 	public int pop;
+	public int originalIndex;
     static final double kmToMile = 0.62;
 
 	CityNode(String name, double lat, double lon, int pop) //regular constructor
