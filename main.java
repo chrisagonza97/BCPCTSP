@@ -109,8 +109,8 @@ public class main {
         System.out.printf("\nRoute: %s\n", makeRouteString());
         System.out.printf("Remaining Budget: %.2f Miles\n", remainingBudget);
         System.out.println("");
-        System.out.println("Value of P^m: "+ (prizeMax- arrCities.get(0).pop * 2));
-        System.out.println("R^m Route: "+makeRouteString(true));
+        System.out.println("Value of P^m: "+  (prizeMax- arrCities.get(0).pop));
+        System.out.println("R^m Route: "+arrCities.get(0).name+" "+ makeRouteString(true));
        /*  System.out.println("");
         System.out.println("Best prize collected using Q table route: "+bestQRoutePrize);
         System.out.println("Distance: "+bestQRouteDist);
@@ -782,7 +782,7 @@ public class main {
                 Q[path.get(v)][path.get(v + 1)] = (1 - alpha) * q
                         + alpha * (R[path.get(v)][path.get(v + 1)] + gamma * maxQ);
                 }
-            }
+            } 
             //check current Q table route:
             /*traverseQ(true);
             if(total_prize - (arrCities.get(0).pop * 2)> bestQRoutePrize){
