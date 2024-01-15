@@ -1,0 +1,13 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "c:\\Users\\Chris\\Desktop\\or-tools_x64_VisualStudio2022_java_v9.5.2237\\jna-5.13.0.jar",
+        "c:\\Users\\Chris\\Desktop\\or-tools_x64_VisualStudio2022_java_v9.5.2237\\ortools-java-9.5.2237.jar",
+        "c:\\Users\\Chris\\Desktop\\or-tools_x64_VisualStudio2022_java_v9.5.2237\\ortools-java-9.5.2237-javadoc.jar",
+        "c:\\Users\\Chris\\Desktop\\or-tools_x64_VisualStudio2022_java_v9.5.2237\\ortools-win32-x86-64-9.5.2237.jar",
+        "c:\\Users\\Chris\\Desktop\\or-tools_x64_VisualStudio2022_java_v9.5.2237\\protobuf-java-4.0.0-rc-2.jar"
+    ],
+    "java.project.sourcePaths": [
+        ""
+    ]
+}
