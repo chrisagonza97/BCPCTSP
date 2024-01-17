@@ -13,7 +13,7 @@ public class main {
     private static double remainingBudget;
 
     // static variables to be tweaked by user
-    static final int TRIALS = 30000;
+    static final int TRIALS = 4000;
     static final int NUM_AGENTS = 5;
     static final double W = 100.0; // constant value to update the reward table
     static double alpha = 0.125; // .125 learning rate
@@ -41,6 +41,7 @@ public class main {
     static Graph sGraph;
     static double[][] Q;
     static double[][] R;
+    static double[][] C;
     static int statesCt;
     static int total_prize = 0;
     static double total_wt = 0;
@@ -100,6 +101,7 @@ public class main {
         System.out.println("\n========== BC-PC-TSP MARL algorithm ==========");
         String[] cityList = {"Albany,NY","Annapolis,MD","Atlanta,GA","Augusta,ME", "Austin,TX","BatonRouge,LA",
                 "Bismarck,ND", "Boise,ID", "Boston,MA","CarsonCity,NV"};
+//        String[] cityList = {"CarsonCity,NV"};
         budget = 6000;
         System.out.println("Budget: "+budget);
         System.out.println("Episodes: "+TRIALS);
@@ -109,6 +111,7 @@ public class main {
             System.out.println("=================  Start and End City:  " + cityList[i]+ "  ===================\n");
             begin = cityList[i];
             end = cityList[i];
+            
             total_prize = 0;
             total_wt = 0;
 
@@ -428,17 +431,20 @@ public class main {
         statesCt = sGraph.n()-1;
         Q = new double[statesCt][statesCt];
         R = new double[statesCt][statesCt];
+        C = new double[statesCt][statesCt];
 
         for (int i = 0; i < statesCt; i++)
             for (int j = 0; j < statesCt; j++) {
                 if(i==j){
                     R[i][j] = -999999;
                     Q[i][j] = -9999999;
+                    C[i][j] = -9999999;
                 } else {
                     R[i][j] = sGraph.weight(i, j) / sGraph.getPrize(j) * -1;
-                    Q[i][j] = (sGraph.getPrize(i) + sGraph.getPrize(j)) / sGraph.weight(i, j);
+//                    Q[i][j] = (sGraph.getPrize(i) + sGraph.getPrize(j)) / sGraph.weight(i, j);
+                    C[i][j] = (sGraph.getPrize(i) + sGraph.getPrize(j)) / sGraph.weight(i, j);
 //                    Q[i][j] =  sGraph.getPrize(j) / sGraph.weight(i, j);
-//                Q[i][j] = 0;
+                Q[i][j] = 0;
                 }
 
             }
@@ -495,15 +501,16 @@ public class main {
                         if (nextState == aj.getLastNode()) {
                             aj.isDone = true;
                         }
+
+                        // updating Q-Table
 //                        double maxQ = maxQ(aj, nextState);
 //                        double maxQ = findFeasibleMaxQ(nextState, aList[j]);
-//                        System.out.println(maxQ);
-                        // System.out.println("current state    "+ aj.curState);
-                        // updating Q-Table
+
 //                        Q[aj.curState][nextState] = (1 - alpha) * Q[aj.curState][nextState] + alpha * gamma * maxQ;
+
+
                         // updating current agent
                         aj.indexPath.add(nextState);
-//                        System.out.println("current state: " + aj.curState + "   Next State:  "+ nextState);
                         aj.total_wt += aj.shortestPath(aj.curState, nextState);
                         aj.total_prize += aj.getTotalPrize(nextState);
                         aj.setAgentMark(nextState, VISITED);
@@ -517,77 +524,21 @@ public class main {
             Agent jStar = aList[mostFitIndex];
             ArrayList<Integer> path = jStar.indexPath;
             jStar.resetAgentMarks();
-            //new new logic:
-//            System.out.println(path);
-            boolean found = false;
-            if (!listMax.isEmpty()) {
-                for (int k = 0;k <i; k++) {
-                    if (listMax.get(k).equals(path)){
-                        found = true;
-                        break;
-                    }
-                }
-            }
 
+            //new new logic:
             listMax.put(i,path);
             int lastDestination = path.getLast();
             path.add(0,lastDestination);
-//            System.out.println(lastDestination);
-            for (int v = 0; v < path.size()-1; v++) {
-//                double q = Q[path.get(v)][path.get(v + 1)];
-//                double maxQ = maxQ(jStar, path.get(v + 1));
-//                double maxQ = findMaxQ(path.get(v+1)-1);
-//                System.out.println("-----------updated ---------------");
-                //R-Table updated
-//                R[path.get(v)][path.get(v + 1)] += (2*W / jStar.total_prize);
-                // NO R-Table
-                //make new reward 200-prize of city / total prizes of route
 
-                // distance between cities = sGraph.shortestPath(v, v+1)
-                // jstar total prizes = jStar.total_prize
-                // ************** jStar prize subtract last reward ******************
-                int lastIndex = jStar.indexPath.getLast();
-                double lastPrize = sGraph.getPrize(lastIndex);
-//                System.out.println(" jStar last Prize: "+lastPrize);
-                double jStarPrizeTotal = jStar.total_prize - lastPrize;
-//                System.out.println(" jStar new Prizes: "+jStarPrizeTotal);
-
-                // ******************* reward Table
-//                R[(path.get(v))-1][(path.get(v + 1))-1] += (W / jStarPrizeTotal);
-//                double reward = R[(path.get(v))-1][(path.get(v + 1))-1];
-
-                // ******************* no reward Table
-                double reward = 2*jStar.total_prize/sGraph.shortestPath(v, v+1);
-
-                //Q-Table updated
-                double beforeQValue = Q[(path.get(v))-1][(path.get(v + 1))-1];
-//                double firstPart = (1 - alpha) * Q[path.get(v)-1][path.get(v + 1)-1];
-//                double secondPart = alpha * (reward + gamma * maxQ);
-                //*************** this was the update before only taking the greatest
-//                Q[(path.get(v))-1][(path.get(v + 1))-1] = (1 - alpha) * Q[path.get(v)-1][path.get(v + 1)-1] + alpha *
-//                        (reward + gamma * maxQ);
-//                System.out.println(firstPart);
-//                System.out.println(secondPart);
-//                System.out.println("Before: " + beforeQValue + "    After: " + Q[(path.get(v))-1][(path.get(v + 1))-1]);
-//                System.out.println(path);
-//                Q[path.get(v)][path.get(v + 1)] = (1 - alpha) * q
-//                        + alpha * (R[path.get(v)][path.get(v + 1)] + gamma * maxQ);
-            }
-            //new logic:
+            //new logic: checking if the currently found route is better than previous episodes
             boolean first = false;
             if(aList[mostFitIndex].total_prize > prizeMax){
-//                System.out.println("Better Path Found ----------------------");
                 prizeMax = aList[mostFitIndex].total_prize;
                 routeMax = path;
                 episodeMax = i;
                 maxCount++;
                 first = true;
             }
-//            //# update explore rate
-//                    explor_rate = min_explore + (max_explor - min_explore) * Math.exp(-decay_rate * i);
-////            System.out.println(explor_rate);
-//            // update date Q-table with highest route
-//            This is working... but try to change the prizemax to the correct number
             double newlyFound = 1;
             if(first){
                 newlyFound = episodeMax;
@@ -704,7 +655,7 @@ public class main {
                 double total = 0;
                 for (int i = 0; i < feasible.size(); i++) {
                     int u = feasible.get(i);
-                    prob[i] = Math.pow(Q[s][u], delta) * aj.getPrize(u) / Math.pow(aj.weight(s, u), beta);
+                    prob[i] = Math.pow(C[s][u], delta) * aj.getPrize(u) / Math.pow(aj.weight(s, u), beta);
                     total += prob[i];
                 }
                 // uniform the distribution
