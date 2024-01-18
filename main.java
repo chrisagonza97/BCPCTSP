@@ -440,7 +440,8 @@ public class main {
                     Q[i][j] = -9999999;
                     C[i][j] = -9999999;
                 } else {
-                    R[i][j] = sGraph.weight(i, j) / sGraph.getPrize(j) * -1;
+//                    R[i][j] = sGraph.weight(i, j) / sGraph.getPrize(j) * -1;
+                    R[i][j] = 0;
 //                    Q[i][j] = (sGraph.getPrize(i) + sGraph.getPrize(j)) / sGraph.weight(i, j);
                     C[i][j] = (sGraph.getPrize(i) + sGraph.getPrize(j)) / sGraph.weight(i, j);
 //                    Q[i][j] =  sGraph.getPrize(j) / sGraph.weight(i, j);
