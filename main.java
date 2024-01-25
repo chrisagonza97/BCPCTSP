@@ -13,14 +13,14 @@ public class main {
     private static double remainingBudget;
 
     // static variables to be tweaked by user
-    static final int TRIALS = 4000;
+    static final int TRIALS = 30000;
     static final int NUM_AGENTS = 5;
     static final double W = 100.0; // constant value to update the reward table
-    static double alpha = 0.125; // .125 learning rate
+    static double alpha = 0.1; // .125 learning rate
     static double gamma = 0.35; // .35 discount factor
     static final double delta = 1; // power for Q value
     static final double beta = 2; // power for distance
-    static double q0 = 0.8; // coefficient for exploration and exploitation
+    static double q0 = 0.8; // default 0.8 coefficient for exploration and exploitation
 
     // **************************** greedy epsilon
     static double explor_rate = 1.0;  // default 1.0
@@ -99,18 +99,27 @@ public class main {
 //        System.out.printf("Remaining Budget: %.2f miles\n", remainingBudget);
 
         System.out.println("\n========== BC-PC-TSP MARL algorithm ==========");
-        String[] cityList = {"Albany,NY","Annapolis,MD","Atlanta,GA","Augusta,ME", "Austin,TX","BatonRouge,LA",
-                "Bismarck,ND", "Boise,ID", "Boston,MA","CarsonCity,NV"};
+//        String[] cityList = {"Albany,NY","Annapolis,MD","Atlanta,GA","Augusta,ME", "Austin,TX","BatonRouge,LA",
+//                "Bismarck,ND", "Boise,ID", "Boston,MA","CarsonCity,NV"};
+
+        // The state to find needs to be the last in the on the txt file
+        String[] cityList = {"Trenton,NJ"};
+
+        // this is the txt file with all the States
+        fileName = "Capital_Cities.txt";
 //        String[] cityList = {"CarsonCity,NV"};
         budget = 6000;
         System.out.println("Budget: "+budget);
         System.out.println("Episodes: "+TRIALS);
         System.out.println("Agents: "+NUM_AGENTS);
 
-        for(int i = 0;i < cityList.length;i++){
-            System.out.println("=================  Start and End City:  " + cityList[i]+ "  ===================\n");
-            begin = cityList[i];
-            end = cityList[i];
+        int lowest = 99999;
+        int lowCount = 0;
+
+        for(int i = 0;i < 1;i++){
+            System.out.println("=================  Start and End City:  " + cityList[0]+ "  ===================\n");
+            begin = cityList[0];
+            end = cityList[0];
             
             total_prize = 0;
             total_wt = 0;
@@ -142,13 +151,21 @@ public class main {
             //!!!!!!!!!!!!!!!
 
             System.out.println();
-            System.out.println("Value of P^m: " + (prizeMax - arrCities.get(0).pop));
+            int pMvalue = (prizeMax - arrCities.get(0).pop);
+            System.out.println("Value of P^m: " + (pMvalue));
+//            System.out.println("Value of P^m: " + (prizeMax - arrCities.get(0).pop));
 //        System.out.println("R^m Route: " + arrCities.get(0).name + " " + makeRouteString(true));
             System.out.println("R^m Route: " + makeRouteString(true));
             System.out.println("Episode P^m and R^m: " + episodeMax + "\n\n");
-
-
+            if(pMvalue != 551){
+                lowCount++;
+            }
+            if(pMvalue < lowest){
+                lowest = pMvalue;
+            }
         }
+        System.out.println("lowest route: " + lowest);
+        System.out.println("Number of Sub-Optimal: " + lowCount);
 
 
 
@@ -158,13 +175,6 @@ public class main {
                 {7, 8, 9}
         };
 
-        // Print the 2D array
-//        for (int i = 0; i < Q.length; i++) {
-//            for (int j = 0; j < Q[i].length; j++) {
-//                System.out.print(Q[i][j] + " ");
-//            }
-//            System.out.println(); // Move to the next line after printing each row
-//        }
     }
 
     public static void printR(String text){
@@ -556,6 +566,7 @@ public class main {
 //                System.out.println("Before: " + beforeQValue + "    After: " + Q[(routeMax.get(v))-1][(routeMax.get(v + 1))-1]);
             }
 
+
         }
 
     }
@@ -815,7 +826,8 @@ public class main {
         double qTableReward = 0;
         ArrayList<Integer> qTableRoute = new ArrayList<>();
         ArrayList<Integer> feasible = new ArrayList<>();
-        for(int i = 0;i<10;i++){
+
+        for(int i = 0;i<allNameList.size();i++){
             feasible.add(i);
         }
 
